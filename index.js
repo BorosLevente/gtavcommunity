@@ -1,64 +1,156 @@
-// db/index.js — PostgreSQL kapcsolat és táblák inicializálása
-import pg from 'pg';
-const { Pool } = pg;
+/*!
+ * body-parser
+ * Copyright(c) 2014-2015 Douglas Christopher Wilson
+ * MIT Licensed
+ */
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+'use strict'
 
-export const db = {
-  query: (text, params) => pool.query(text, params),
-};
+/**
+ * Module dependencies.
+ * @private
+ */
 
-export async function initDB() {
-  console.log('🗄️  Adatbázis inicializálása...');
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS accounts (
-      id         SERIAL PRIMARY KEY,
-      username   TEXT UNIQUE NOT NULL,
-      password   TEXT NOT NULL,
-      role       TEXT NOT NULL DEFAULT 'Support',
-      created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
-      last_login BIGINT
-    );
+var deprecate = require('depd')('body-parser')
 
-    CREATE TABLE IF NOT EXISTS applications (
-      id              SERIAL PRIMARY KEY,
-      username        TEXT NOT NULL,
-      age             INT,
-      position        TEXT NOT NULL,
-      member_since    TEXT,
-      motivation      TEXT,
-      audition_status TEXT,
-      submitted_at    BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
-    );
+/**
+ * Cache of loaded parsers.
+ * @private
+ */
 
-    CREATE TABLE IF NOT EXISTS logs (
-      id         SERIAL PRIMARY KEY,
-      type       TEXT NOT NULL DEFAULT 'action',
-      username   TEXT,
-      text       TEXT NOT NULL,
-      created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
-    );
+var parsers = Object.create(null)
 
-    CREATE TABLE IF NOT EXISTS settings (
-      key   TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
-  `);
+/**
+ * @typedef Parsers
+ * @type {function}
+ * @property {function} json
+ * @property {function} raw
+ * @property {function} text
+ * @property {function} urlencoded
+ */
 
-  // Alapértelmezett admin fiók, ha még nincs egy se
-  const { rows } = await pool.query('SELECT COUNT(*) FROM accounts');
-  if (parseInt(rows[0].count) === 0) {
-    const bcrypt = await import('bcryptjs');
-    const hash = await bcrypt.default.hash('admin123', 10);
-    await pool.query(
-      'INSERT INTO accounts (username, password, role) VALUES ($1, $2, $3)',
-      ['admin', hash, 'Tulajdonos']
-    );
-    console.log('✅ Alapértelmezett admin fiók létrehozva: admin / admin123');
+/**
+ * Module exports.
+ * @type {Parsers}
+ */
+
+exports = module.exports = deprecate.function(bodyParser,
+  'bodyParser: use individual json/urlencoded middlewares')
+
+/**
+ * JSON parser.
+ * @public
+ */
+
+Object.defineProperty(exports, 'json', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('json')
+})
+
+/**
+ * Raw parser.
+ * @public
+ */
+
+Object.defineProperty(exports, 'raw', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('raw')
+})
+
+/**
+ * Text parser.
+ * @public
+ */
+
+Object.defineProperty(exports, 'text', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('text')
+})
+
+/**
+ * URL-encoded parser.
+ * @public
+ */
+
+Object.defineProperty(exports, 'urlencoded', {
+  configurable: true,
+  enumerable: true,
+  get: createParserGetter('urlencoded')
+})
+
+/**
+ * Create a middleware to parse json and urlencoded bodies.
+ *
+ * @param {object} [options]
+ * @return {function}
+ * @deprecated
+ * @public
+ */
+
+function bodyParser (options) {
+  // use default type for parsers
+  var opts = Object.create(options || null, {
+    type: {
+      configurable: true,
+      enumerable: true,
+      value: undefined,
+      writable: true
+    }
+  })
+
+  var _urlencoded = exports.urlencoded(opts)
+  var _json = exports.json(opts)
+
+  return function bodyParser (req, res, next) {
+    _json(req, res, function (err) {
+      if (err) return next(err)
+      _urlencoded(req, res, next)
+    })
+  }
+}
+
+/**
+ * Create a getter for loading a parser.
+ * @private
+ */
+
+function createParserGetter (name) {
+  return function get () {
+    return loadParser(name)
+  }
+}
+
+/**
+ * Load a parser module.
+ * @private
+ */
+
+function loadParser (parserName) {
+  var parser = parsers[parserName]
+
+  if (parser !== undefined) {
+    return parser
   }
 
-  console.log('✅ Adatbázis kész');
+  // this uses a switch for static require analysis
+  switch (parserName) {
+    case 'json':
+      parser = require('./lib/types/json')
+      break
+    case 'raw':
+      parser = require('./lib/types/raw')
+      break
+    case 'text':
+      parser = require('./lib/types/text')
+      break
+    case 'urlencoded':
+      parser = require('./lib/types/urlencoded')
+      break
+  }
+
+  // store to prevent invoking require()
+  return (parsers[parserName] = parser)
 }
