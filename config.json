@@ -1,0 +1,99 @@
+{
+  "token": "MTQ1NDU2MTU5NTc1Njc3NzcwNA.GTFBrb.uQcwhTrV1STgAqSmcHN-uC-0yedXs9IsJOV-Pw",
+  "clientId": "1454561595756777704",
+  "guildId": "1059572724617465926",
+  "mainGuildId": "1059572724617465926",
+  "logGuildId": "1460358773653639317",
+  "logChannels": {
+    "join": "1460373267004260466",
+    "leave": "1436744037427318784",
+    "messageDelete": "1436744114250186893",
+    "messageUpdate": "1436744244671942738"
+  },
+  "permissions": {
+    "embedCommandRole": "1275003217369104517",
+    "staffRoleId": "1275003217369104517"
+  },
+  "embedDefaults": {
+        "color": "#0099ff",
+        "footer": "Bot Footer Text"
+  },
+  "ticketCategoryId": "1336763457558675619",
+  "logCategoryName": "1484283552739627038",
+  "channels": {
+    "checkChannels": [
+      "1454864489877864611",
+      "1454864604462059657",
+      "1454864680857239708"
+    ],
+    "reportChannelId": "1454611123067158609",
+    "partnerRemoveChannelId": "1467586032471117985",
+    "autoReactChannelId": "1328384775144345661"
+  },
+  "roles": {
+    "partnerRoleId": "1374830783293821059",
+    "ignoredPings": [
+      "Kis Partner Ping",
+      "Partner Ping",
+      "Nagy Partner Ping"
+    ]
+  },
+  "features": {
+    "inviteCheck": true,
+    "partnerCheck": true
+  },
+  "system": {
+    "mirrorEnabled": true,
+    "logEdits": true,
+    "logDeletes": true
+  },
+  "website": {
+    "apiPort": 3000,
+    "staffIds": [
+      "906183064227577886",
+      "1232374666077671428",
+      "349878203327709194",
+      "658251070757142538",
+      "1114538678790926348",
+      "818125403180105758"
+    ],
+    "staffRoles": [
+      {
+        "id": "1059589453267603527",
+        "name": "Tulajdonos"
+      },
+      {
+        "id": "1326226291766198362",
+        "name": "Server Manager"
+      },
+      {
+        "id": "1403049001820880938",
+        "name": "Community Manager"
+      },
+      {
+        "id": "1374338786602913802",
+        "name": "Staff Manager"
+      },
+      {
+        "id": "1401175109133271200",
+        "name": "Senior Support"
+      },
+      {
+        "id": "1398799869262696499",
+        "name": "Support+"
+      },
+      {
+        "id": "1479202768483909692",
+        "name": "Discord Supervisor"
+      },
+      {
+        "id": "1272637555103367260",
+        "name": "Support"
+      },
+      {
+        "id": "1363193143146713098",
+        "name": "Junior Support"
+      }
+    ]
+  }
+}
